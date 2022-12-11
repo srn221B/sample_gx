@@ -29,13 +29,16 @@ class Target(AbstractTarget):
 
 
 class ProfilingTarget(AbstractProfilingTarget):
+    def __init__(self, target: AbstractTarget = None):
+        self.target = target or Target()
+
     @property
     def datasources_config(self) -> dict:
-        return Target.datasources_config
+        return self.target.datasources_config
     
     @property
     def batch_request(self) -> BatchRequest:
-        return Target.batch_request
+        return self.target.batch_request
 
     @property
     def user_configurable_profiler_config(self) -> dict:
@@ -45,13 +48,16 @@ class ProfilingTarget(AbstractProfilingTarget):
 
 
 class ValidationTarget(AbstractValidationTarget):
+    def __init__(self, target: AbstractTarget = None):
+        self.target = target or Target()
+
     @property
     def datasources_config(self) -> dict:
-        return Target.datasources_config
+        return self.target.datasources_config
     
     @property
     def batch_request(self) -> BatchRequest:
-        return Target.batch_request
+        return self.target.batch_request
 
     @property
     def expectations(self) -> List[dict]:
@@ -85,8 +91,13 @@ class ValidationTarget(AbstractValidationTarget):
 if __name__ == "__main__":
     os.environ['GE_HOME'] = GX_HOME
     context = gx.get_context()
-    context.add_datasource(**Target.datasources_config)
-    profilling = Profilling(ProfilingTarget, context)
+    target = Target()
+    context.add_datasource(**target.datasources_config)
+    print("####### Profiling ########")
+    profiling_target = ProfilingTarget()
+    profilling = Profilling(profiling_target, context)
     profilling.execute()
-    validate = Validate(ValidationTarget, context)
+    print("####### Validate ########")
+    validate_target = ValidationTarget()
+    validate = Validate(validate_target, context)
     validate.execute()
